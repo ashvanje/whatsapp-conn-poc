@@ -12,9 +12,19 @@ function enquiryToCompany(enquiry: any) {
     if (enquiry == 1) {
         return "MTR"
     } else if (enquiry == 2) {
-        return "CTB"
+        return "Citybus"
     } else {
         return "NWFB"
+    }
+}
+
+function companyToEnquiry(enquiry: any) {
+    if (enquiry == "MTR") {
+        return "1"
+    } else if (enquiry == "Citybus") {
+        return "2"
+    } else {
+        return "3"
     }
 }
 
@@ -22,31 +32,31 @@ async function getRoutes(params: any) {
     let company = enquiryToCompany(params.enquiry)
     // let stationCode = params.stop
     // let line = params.route
-    // if (company == "MTR") {
-    console.log(`getRoutes!!!!!!!!!!!!!!`)
-    let mtrRoutes = await axios.get(`http://whenarrive.com/getRoutes?company=MTR`, {
-        // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
-        content: JSON,
-        content_type: 'application/json',
-        expect_type: 'text/plain',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    console.log(`mtrRoutes.data: ${JSON.stringify(mtrRoutes.data)}`)
-    let resultString = ``
-    let i = 1
-    console.log(`mtrRoutes.data: ${JSON.stringify(mtrRoutes.data)}`)
-    for (var route of mtrRoutes.data) {
-        console.log(`route: ${JSON.stringify(route)}`)
-        resultString = resultString +
+    if (company == "MTR") {
+        console.log(`getRoutes!!!!!!!!!!!!!!`)
+        let mtrRoutes = await axios.get(`http://whenarrive.com/getRoutes?company=${company}`, {
+            // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
+            content: JSON,
+            content_type: 'application/json',
+            expect_type: 'text/plain',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        console.log(`mtrRoutes.data: ${JSON.stringify(mtrRoutes.data)}`)
+        let resultString = ``
+        let i = 1
+        console.log(`mtrRoutes.data: ${JSON.stringify(mtrRoutes.data)}`)
+        for (var route of mtrRoutes.data) {
+            console.log(`route: ${JSON.stringify(route)}`)
+            resultString = resultString +
 `${i++} ${route.route}
 `
+        }
+        return resultString
+    } else {
+        return "Please input the bus number"
     }
-    return resultString
-    // } else {
-    //     return "Please input the bus number"
-    // }
 }
 
 async function inoutboundstops(params: any) {
@@ -54,7 +64,8 @@ async function inoutboundstops(params: any) {
     let stationCode = params.stop
     let line = params.route
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
-    let data = { "company": "MTR", "route": "TCL" }
+    let data = { "company": company, "route": line }
+    console.log(`data: ${JSON.stringify(data)}`)
     let inoutboundstops = await axios.post(`http://whenarrive.com/inoutboundstops`, data, {
         // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
         content: JSON,
@@ -64,6 +75,7 @@ async function inoutboundstops(params: any) {
             'Content-Type': 'application/json'
         }
     })
+    console.log(`inoutboundstops: ${JSON.stringify(inoutboundstops.data)}`)
     let resultString = ``
     let i = 1
     for (var element of inoutboundstops.data) {
@@ -80,8 +92,28 @@ async function mtrStops(params: any) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     let line = params.route
+    let direction = params.direction
+    let url = ''
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
-    let stops =  await axios.get(`http://whenarrive.com/mtrStops?route=TCL&bound=up`, {
+    if (company == 'MTR') {
+        url='/mtrStops'
+        if (direction == 1) {
+            direction = 'up'
+        } else {
+            direction = 'down'
+        }
+    } else {
+        url='/citybusStops'
+        if (direction == 1) {
+
+            direction = 'inbound'
+        } else {
+            direction = 'outbound'
+
+        }
+    }
+    console.log(`url: http://whenarrive.com${url}?route=${line}&bound=${direction}&company=${company}`)
+    let stops =  await axios.get(`http://whenarrive.com${url}?route=${line}&bound=${direction}&company=${company}`, {
         "headers": {
             'Connection': 'keep-alive',
             'Accept': 'application/json, text/plain, */*',
@@ -91,6 +123,7 @@ async function mtrStops(params: any) {
             'Accept-Language': 'en-US,en;q=0.9'
         }
     })
+    console.log(`stops: ${JSON.stringify(stops.data)}`)
     let resultString = ``
     let i = 1
     for (var element of stops.data) {
@@ -106,8 +139,30 @@ async function getEta(params: any) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     let line = params.route
+    let direction = params.direction
+    let url = ''
+    let data
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
-    let data = { "company": "MTR", "boundFor": "up", "stationCode": "LAK", "line": "TCL", "station": "Lai King" }
+    if (company == 'MTR') {
+        url='/mtrStops'
+        if (direction == 1) {
+            direction = 'up'
+        } else {
+            direction = 'down'
+        }
+        data = { "company": company, "boundFor": direction, "stationCode": stationCode, "line": line }
+    } else {
+        url='/citybusStops'
+        if (direction == 1) {
+
+            direction = 'inbound'
+        } else {
+            direction = 'outbound'
+
+        }
+        data = { "company": company, "boundFor": direction, "route": line, "startStop": parseInt(stationCode)-1, "endStop":parseInt(stationCode)}
+    }
+    
     let eta = await axios.post(`http://whenarrive.com/getEta`, data, {
         content: JSON,
         content_type: 'application/json',
@@ -116,9 +171,12 @@ async function getEta(params: any) {
             'Content-Type': 'application/json'
         }
     })
+    console.log(`eta.data: ${JSON.stringify(eta.data)}`)
     let resultString = ``
+    let stop = ''
     let i = 1
     for (var element of eta.data) {
+        stop = element.stopName
         console.log(`element: ${JSON.stringify(element)}`)
         resultString = resultString +
 `Destination: ${element.destination}
@@ -126,7 +184,9 @@ Time: ${element.minutesLeft} minutes
 
 `
     }
-    return resultString
+    return `Stop: ${stop}
+    
+${resultString}`
 }
 
 module.exports = {

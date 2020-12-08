@@ -65,7 +65,7 @@ function generateAccessToken(email: any, key: any) {
     let intent = response.data.queryResult.intent.displayName
     let outputContexts = response.data.queryResult.outputContexts
     console.log(`outputContexts.length = ${outputContexts.length}`)
-    let outputContextLength = (outputContexts.length - 2)<0?0:(outputContexts.length - 2)
+    let outputContextLength = (outputContexts.length - 3)<0?0:(outputContexts.length - 3)
     console.log(`outputContextLength = ${outputContextLength}`)
     console.log(`outputContexts[outputContextLength].parameters = ${JSON.stringify(outputContexts[outputContextLength].parameters)}`)
     return {
