@@ -8,6 +8,7 @@ const express = require('express')
 const googleAuth = require('google-oauth-jwt')
 const axios = require('axios')
 const dialogflow = require('./dialogflow')
+const apiHandler = require('./apiHandler')
 
 
 var mongoose = require("mongoose");
@@ -159,7 +160,7 @@ async function sendMessage(userText: any, sessionId: any) {
     } else {
       console.log(`route 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let routes = await getRoutes()
+      let routes = await apiHandler.getRoutes(response.parameters)
       console.log(`routes: ${JSON.stringify(routes.data)}`)
       returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(routes.data)
     }
@@ -172,7 +173,7 @@ async function sendMessage(userText: any, sessionId: any) {
     } else {
       console.log(`direction 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let direction = await inoutboundstops()
+      let direction = await apiHandler.inoutboundstops(response.parameters)
       console.log(`direction: ${JSON.stringify(direction.data)}`)
       returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(direction.data)
     }
@@ -195,17 +196,17 @@ async function sendMessage(userText: any, sessionId: any) {
 
         }
       });
-      console.log(`param2 = ${JSON.stringify(param)}`)
+      // console.log(`param2 = ${JSON.stringify(param)}`)
       // let params = outputContexts
-      let eta = await getEta()
+      let eta = await apiHandler.getEta(response.parameters)
       
-      returnMessage = `data: ${JSON.stringify(eta.data)} stop: ${param.parameters.stop} direction: ${param.parameters.direction} route: ${param.parameters.route}`
+      returnMessage = `data: ${JSON.stringify(eta.data)} stop: ${response.parameters.stop} direction: ${response.parameters.direction} route: ${response.parameters.route}`
       console.log(`askStop 1`)
       // returnMessage= await sendMessage('askStop', sessionId)
     } else {
       console.log(`askStop 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let stops = await mtrStops()
+      let stops = await apiHandler.mtrStops(response.parameters)
       console.log(`stops: ${JSON.stringify(stops.data)}`)
       returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(stops.data)
     }
@@ -214,57 +215,6 @@ async function sendMessage(userText: any, sessionId: any) {
 
   // console.log(`@@@@@@@@`)
   return returnMessage
-}
-
-async function getRoutes () {
-  return await axios.get(`http://whenarrive.com/getRoutes?company=MTR`, {
-    // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
-    content: JSON,
-    content_type: 'application/json',
-    expect_type: 'text/plain',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
-
-async function inoutboundstops () {
-  let data = {"company":"MTR","route":"TCL"}
-  return await axios.post(`http://whenarrive.com/inoutboundstops`, data, {
-    // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
-    content: JSON,
-    content_type: 'application/json',
-    expect_type: 'text/plain',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
-
-
-async function mtrStops () {
-  return await axios.get(`http://whenarrive.com/mtrStops?route=TCL&bound=up`, {
-    "headers": {
-      'Connection': 'keep-alive', 
-      'Accept': 'application/json, text/plain, */*', 
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36', 
-      'Content-Type': 'application/json', 
-      'Referer': 'http://whenarrive.com/', 
-      'Accept-Language': 'en-US,en;q=0.9'
-    }
-  })
-}
-
-async function getEta () {
-  let data = {"company":"MTR","boundFor":"up","stationCode":"LAK","line":"TCL","station":"Lai King"}
-  return await axios.post(`http://whenarrive.com/getEta`, data, {
-    content: JSON,
-    content_type: 'application/json',
-    expect_type: 'text/plain',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
 }
 
 async function connectMongo() {
