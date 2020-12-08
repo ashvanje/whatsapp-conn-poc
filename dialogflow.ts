@@ -64,11 +64,15 @@ function generateAccessToken(email: any, key: any) {
     let fulfillmentMessagesText = response.data.queryResult.fulfillmentMessages[0].text.text[0]
     let intent = response.data.queryResult.intent.displayName
     let outputContexts = response.data.queryResult.outputContexts
+    console.log(`outputContexts.length = ${outputContexts.length}`)
+    let outputContextLength = (outputContexts.length - 2)<0?0:(outputContexts.length - 2)
+    console.log(`outputContextLength = ${outputContextLength}`)
+    console.log(`outputContexts[outputContextLength].parameters = ${JSON.stringify(outputContexts[outputContextLength].parameters)}`)
     return {
         dialogFlowFulfillmentMessage: fulfillmentMessagesText,
         intent: intent,
         outputContexts: outputContexts,
-        parameters: outputContexts[outputContexts.length - 2].parameters,
+        parameters: outputContexts[outputContextLength].parameters,
         rawResponse: response.data
     }
   }

@@ -149,7 +149,10 @@ async function sendMessage(userText: any, sessionId: any) {
       console.log(`availableEnquiries 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
       // let routes = await getRoutes()
-      returnMessage = dialogFlowFulfillmentMessage
+      let testString = 
+`${dialogFlowFulfillmentMessage}
+`
+      returnMessage = testString
     }
   } else if (intent == 'route') {
     console.log(`route`)
@@ -161,8 +164,12 @@ async function sendMessage(userText: any, sessionId: any) {
       console.log(`route 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
       let routes = await apiHandler.getRoutes(response.parameters)
-      console.log(`routes: ${JSON.stringify(routes.data)}`)
-      returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(routes.data)
+      // console.log(`routes: ${JSON.stringify(routes.data)}`)
+      returnMessage = 
+`
+${dialogFlowFulfillmentMessage}
+${routes}
+`
     }
   } else if (intent == 'direction') {
     console.log(`direction`)
@@ -174,8 +181,12 @@ async function sendMessage(userText: any, sessionId: any) {
       console.log(`direction 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
       let direction = await apiHandler.inoutboundstops(response.parameters)
-      console.log(`direction: ${JSON.stringify(direction.data)}`)
-      returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(direction.data)
+      // console.log(`direction: ${JSON.stringify(direction.data)}`)
+      returnMessage = 
+`
+${dialogFlowFulfillmentMessage}
+${direction}
+`
     }
 
   } else if (intent == 'stop') {
@@ -200,20 +211,22 @@ async function sendMessage(userText: any, sessionId: any) {
       // let params = outputContexts
       let eta = await apiHandler.getEta(response.parameters)
       
-      returnMessage = `data: ${JSON.stringify(eta.data)} stop: ${response.parameters.stop} direction: ${response.parameters.direction} route: ${response.parameters.route}`
+      returnMessage = eta
       console.log(`askStop 1`)
       // returnMessage= await sendMessage('askStop', sessionId)
     } else {
       console.log(`askStop 2`)
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
       let stops = await apiHandler.mtrStops(response.parameters)
-      console.log(`stops: ${JSON.stringify(stops.data)}`)
-      returnMessage = dialogFlowFulfillmentMessage + JSON.stringify(stops.data)
+      // console.log(`stops: ${JSON.stringify(stops.data)}`)
+      returnMessage =  
+`
+${dialogFlowFulfillmentMessage}
+${stops}
+`    
     }
 
   }
-
-  // console.log(`@@@@@@@@`)
   return returnMessage
 }
 
