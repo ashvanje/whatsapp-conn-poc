@@ -65,14 +65,31 @@ function generateAccessToken(email: any, key: any) {
     let intent = response.data.queryResult.intent.displayName
     let outputContexts = response.data.queryResult.outputContexts
     console.log(`outputContexts.length = ${outputContexts.length}`)
-    let outputContextLength = (outputContexts.length - 3)<0?0:(outputContexts.length - 3)
+    let outputContextLength = (outputContexts.length - 2)<0?0:(outputContexts.length - 2)
     console.log(`outputContextLength = ${outputContextLength}`)
     console.log(`outputContexts[outputContextLength].parameters = ${JSON.stringify(outputContexts[outputContextLength].parameters)}`)
+
+    //availableenquiries-followup
+    let outputContext
+    for (var element of outputContexts) {
+      if (element.name.endsWith('availableenquiries-followup')) {
+        outputContext = element
+      }
+    }
+    console.log(`outputcontext: ${JSON.stringify(outputContext)}`)
+    let parameters
+    if (outputContext) {
+      console.log(`outputcontext is not null`)
+      parameters = outputContext.parameters
+    } else {
+      console.log(`outputcontext is null`)
+
+    }
     return {
         dialogFlowFulfillmentMessage: fulfillmentMessagesText,
         intent: intent,
         outputContexts: outputContexts,
-        parameters: outputContexts[outputContextLength].parameters,
+        parameters: parameters,
         rawResponse: response.data
     }
   }

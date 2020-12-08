@@ -28,12 +28,28 @@ function companyToEnquiry(enquiry: any) {
     }
 }
 
+function mtrLineMapper(route: any) {
+    switch (route) {
+        case "1":
+            return "TCL"
+        case "2":
+            return "AEL"
+        case "3":
+            return "TKL"
+        case "4":
+            return "WRL"
+        default:
+            return ""
+    }
+}
 async function getRoutes(params: any) {
+    console.log(`getRoutes!!!!!!!!!!!!!!`)
+    console.log(`getRoutes!!!!!!!!!!!!!! ${JSON.stringify(params)}`)
     let company = enquiryToCompany(params.enquiry)
+    console.log(`company!!!!!!!!!!!!!! ${company}`)
     // let stationCode = params.stop
     // let line = params.route
     if (company == "MTR") {
-        console.log(`getRoutes!!!!!!!!!!!!!!`)
         let mtrRoutes = await axios.get(`http://whenarrive.com/getRoutes?company=${company}`, {
             // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
             content: JSON,
@@ -62,7 +78,9 @@ async function getRoutes(params: any) {
 async function inoutboundstops(params: any) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
-    let line = params.route
+    console.log(`(params.route): ${(params.route)}`)
+    console.log(`mtrLineMapper(params.route): ${mtrLineMapper(params.route)}`)
+    let line = company=="MTR"?mtrLineMapper(params.route):params.route
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
     let data = { "company": company, "route": line }
     console.log(`data: ${JSON.stringify(data)}`)
@@ -91,7 +109,7 @@ async function inoutboundstops(params: any) {
 async function mtrStops(params: any) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
-    let line = params.route
+    let line = company=="MTR"?mtrLineMapper(params.route):params.route
     let direction = params.direction
     let url = ''
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
@@ -128,9 +146,15 @@ async function mtrStops(params: any) {
     let i = 1
     for (var element of stops.data) {
         console.log(`element: ${JSON.stringify(element)}`)
-        resultString = resultString +
+        if (company == 'MTR') {
+            resultString = resultString +
+`${i++} ${element.stopName} (${element.stationCode})
+`
+        } else {
+            resultString = resultString +
 `${i++} ${element.stopName}
 `
+        }
     }
     return resultString
 }
@@ -138,7 +162,7 @@ async function mtrStops(params: any) {
 async function getEta(params: any) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
-    let line = params.route
+    let line = company=="MTR"?mtrLineMapper(params.route):params.route
     let direction = params.direction
     let url = ''
     let data
