@@ -9,6 +9,8 @@ const googleAuth = require('google-oauth-jwt')
 const axios = require('axios')
 const dialogflow = require('./dialogflow')
 const apiHandler = require('./apiHandler')
+const db = require('./db')
+const intentHandler = require('./intentHandler')
 
 
 var mongoose = require("mongoose");
@@ -16,218 +18,12 @@ var mongoConnection: any;
 var viewSchema = new mongoose.Schema({}, { strict: false });
 var viewModel = mongoose.model("View", viewSchema);
 
-
-// WORKED FOR CITYBUS
-// async function sendMessage(userText: any, sessionId: any) {
-
-//   let email = 'dialogflow-bmwdcn@nextmtr-cqpc.iam.gserviceaccount.com'
-//   let key = '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvcAQWdM/JT1cK\n4cxDfGR1LFgpB3/eXAKuA2t6Zvmd2pc+Ieq5vu5ZmkWrn626U9zpYy0Zv0FeeJrR\nB/h5hX/l4EslvzwGt+6If7Vl6LuPt9HWgJWAynYC1Tfjs9Oj4XBDz4JK0IPH8Aho\nSydZdCOHcwIE9eXm5Zuy7sr2rZPRuL72dP1Nj5Z2Ei4LX3mzJtKpV2cxubm2VUqD\n4COF+TQjgtLaXWrCHESntzu83SKQjqZ7xdpR4TmBmwcNsJ7YjrBoGT4MOAan1Za7\n6dW11WbdYVqe8uFJs0GSMCwnipAuqoyoeLRE5zK//XHxiSVS8au7o5rXlFQ69ev6\nZXNQiA13AgMBAAECggEARrza2RcmhRw5k4ix7PAmLVzA+2Iru8PLzNBSMNt+gJiX\n7RSN6XFD99sNhoLu8LdJ1s0HbV9Bg08L1YbqOE2M4WqLwl+WW3skceNUiA/MOMm8\nkUntfi2kYcYJMAXdKzIGK0FrXrEuwZpWOX88EYSTotTLlqZzmaMxIXfJXKdmd+Pi\nOeL9R/I5S4k9k3EtslIfTTs2rajwdmd/ANDHWBFG+1uqh+7NLMRNAiAl+x/AGdVU\naqg0g1UPG2bVYQis4hQrMlkvC+uJfZXVseZIoHEnyAB87fnB/j3h80dOvJLKOtzX\nVHjRphzuRjeed5p+tcWygl8Batj1gY7hoZp1XC1VWQKBgQD2cX6fpTydSKpzNiJX\nSXR1JsC75D+IPJX0cA74Ss4zksos62BU375RHVztdp5ZhCok90hoqDMKPibOPnBr\nbMY8kNV2NOJ+we4KuAcNrcUvM6YhOhKwYXimddiUyffBoqan3hrInJUpq5NCWPf+\nCjVXhWaUB9kWPpEr7vu+85ejbQKBgQC2PaEIvCP0xZDzRvJkSPkecGs/09TUwpIq\n9Dou2xkH5wr+2h4tjkM8DKlqTuijqFU3VpVNqt3QtMXQjQFO+bpkkWINGSM8zojM\nLhYLSW3UFKSr8p70J6zuAfM5vmrRSEIRcEJeBchePmSeVcKlNpOoJ+ytlplNZ2Q5\nppnQgnaB8wKBgQCgt9uQWb5yBJXElSVIL4tXa3J+FpioTHqu8vWQT5iyYaSgLtCg\nCVqgo7ma06TpVBv4B5ydRDQlFetQzb+bD1Eo5nuPn2WmrOqE6wcOkKjr448QVEMj\n7C02wdwBDMYa7ewpxdtJwXQ1vMNInaT9c8Ld1Q3UtFmK/DrIoA5ltY7K8QKBgDBJ\nkiKzXz+bHbYoRU+nOkMDfJdz9H/PclVpUwVZTn+Wi4ZNmxNtD4mYvUcK03+Rucqo\n6XSj4pRLYeLJieA4MVg2YWmhEIIrI3oed/7TnQNF2QAqkE2XOa3y3FSfjMQZRlBC\nk4NAOwAlvhlqFeIa3PMAaSjxr3sf+yF/cGAcQXRbAoGBAL2zeeuIARjmlKprGES/\nSVcXMXlN5lOgamSUzBtnRB45NAhvCY7RYKADcq66Ginnw2PeaygaAFRGhIz0fxNI\nIUi8zZtwh/BggNcqQ86XLrBldD42kUhds9jrYBWiM/Rv2XCmUHBiadH/P5qXFSms\nvgAs1GI+5EytOxPL/BlYLJOF\n-----END PRIVATE KEY-----\n'
-//   let url = 'https://dialogflow.googleapis.com/v2/'
-//   let path = 'projects/nextmtr-cqpc/agent/sessions/'
-//   let sid = 'abcdefg'
-
-//   console.log('!!!!!!!!!!!!!1')
-//   let accessToken = await generateAccessToken(email, key)
-//   // let accessToken = 'ya29.a0AfH6SMBkS1Z-Q1Jg0iQFgdp0BHRragc3qCGutQayiSoj1XuLeGNC-SYsJbgRyrGO4UFngqQkggIYiIFC3CGaHv--JYTodTKIjhWPr8-j53mLoqKrbOhPP_5wUEomvgaUpHOeV7eTCaTZwLZIUm6ctICB4vDMZz0OkAVTcFzaP2A'
-//   console.log('!!!!!!!!!!!!!2' + accessToken)
-
-//   console.log(`${url}${path}${sessionId}:detectIntent`)
-
-//   let data;
-
-//   data = {
-//     queryInput: {
-//       text: {
-//         text: userText,
-//         languageCode: "en"
-//       }
-//     }
-//   }
-
-//   //https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent
-//   let response = await axios.post(`${url}${path}${sessionId}:detectIntent`, data, {
-//     // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
-//     content: JSON,
-//     content_type: 'application/json',
-//     expect_type: 'text/plain',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${accessToken}`
-//     }
-//   })
-//   console.log(`response = ${JSON.stringify(response.data)}`)
-//   console.log(`response = ${JSON.stringify(response.data.queryResult.fulfillmentMessages)}`)
-
-//   let dialogFlowFulfillmentMessage = `${response.data.queryResult.fulfillmentMessages[0].text.text[0]}`
-//   let returnMessage = ''
-//   console.log(`intent: ${intent}`)
-//   console.log(`dialogFlowFulfillmentMessage: ${dialogFlowFulfillmentMessage}`)
-//   if (intent == 'askRouteStop') {
-//     console.log(`askRouteStop`)
-//     if (dialogFlowFulfillmentMessage.includes("biz")) {
-//       console.log(`askRouteStop 1`)
-//       returnMessage = await sendMessage('askDirection', sessionId)
-//     } else {
-//       console.log(`askRouteStop 2`)
-//       returnMessage = dialogFlowFulfillmentMessage
-//     }
-//   } else if (intent == 'askDirection') {
-//     console.log(`askDirection`)
-//     if (dialogFlowFulfillmentMessage.includes("biz")) {
-//       console.log(`askDirection 1`)
-//       returnMessage = await sendMessage('askStop', sessionId)
-//     } else {
-//       console.log(`askDirection 2`)
-//       returnMessage = dialogFlowFulfillmentMessage
-//     }
-
-//   } else if (intent == 'askStop') {
-//     console.log(`askStop`)
-//     if (dialogFlowFulfillmentMessage.includes("biz")) {
-//       let param: any
-//       console.log(`dialogFlowFulfillmentMessage = ${JSON.stringify(dialogFlowFulfillmentMessage)}`)
-//       console.log(`outputContexts = ${JSON.stringify(outputContexts)}`)
-
-//       outputContexts.forEach((outputContext: { name: { include: (arg0: string) => any } }) => {
-//         console.log(`outputContext = ${JSON.stringify(outputContext)}`)
-//         let outputContextName = `${outputContext.name}`
-//         console.log(`outputContextName = ${JSON.stringify(outputContextName)}`)
-//         if (outputContextName.includes('testfollowupintent-followup')) {
-//           param = outputContext
-//           console.log(`param = ${JSON.stringify(param)}`)
-
-//         }
-//       });
-//       console.log(`param2 = ${JSON.stringify(param)}`)
-//       // let params = outputContexts
-
-//       let data;
-//       let stop = parseInt(param.parameters.stop,10)
-//       data = { "company": "Citybus", "route": param.parameters.route, "boundFor": "outbound", "startStop": stop-1, "endStop": stop }
-
-//       //https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent
-//       let etaResponse = await axios.post(`http://whenarrive.com/getEta`, data, {
-//         // let response = await axios.post(`https://dialogflow.googleapis.com/v2/projects/nextmtr-cqpc/agent/sessions/84422efe-b394-414f-862f-871fb4607a7d:detectIntent`, data, {
-//         content: JSON,
-//         content_type: 'application/json',
-//         expect_type: 'text/plain',
-//         headers: {
-//           'Content-Type': 'application/json'
-//         }
-//       })
-//       console.log(`etaResponse.data = ${JSON.stringify(etaResponse.data)}`)
-
-//       returnMessage = `data: ${JSON.stringify(etaResponse.data)} stop: ${param.parameters.stop} direction: ${param.parameters.direction} route: ${param.parameters.route}`
-//       console.log(`askStop 1`)
-//       // returnMessage= await sendMessage('askStop', sessionId)
-//     } else {
-//       console.log(`askStop 2`)
-//       returnMessage = dialogFlowFulfillmentMessage
-//     }
-
-//   }
-
-//   // console.log(`@@@@@@@@`)
-//   return returnMessage
-// }
-
 async function sendMessage(userText: any, sessionId: any) {
-  let response = await dialogflow.detectIntent(userText, sessionId)
-  let dialogFlowFulfillmentMessage = `${response.dialogFlowFulfillmentMessage}`
-  let returnMessage = ''
-  let outputContexts = response.outputContexts
-  let intent = `${response.intent}`
+  console.log(`begin dialogflow.detectIntent`)
+  // let response = await dialogflow.detectIntent(userText, sessionId)
+  console.log(`finish dialogflow.detectIntent`)
+  let returnMessage = await intentHandler.handleIntent(userText, sessionId)
 
-  
-  if (intent == 'availableEnquiries') {
-    console.log(`availableEnquiries`)
-    if (dialogFlowFulfillmentMessage.includes("biz")) {
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      console.log(`availableEnquiries 1`)
-      returnMessage = await sendMessage('bizRuleRoute', sessionId)
-    } else {
-      console.log(`availableEnquiries 2`)
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      // let routes = await getRoutes()
-      let testString = 
-// `${dialogFlowFulfillmentMessage}
-// `
-`What type of transport are you taking?
-1) MTR
-2) Citybus
-3) NWFB
-`
-      returnMessage = testString
-    }
-  } else if (intent == 'route') {
-    console.log(`route`)
-    if (dialogFlowFulfillmentMessage.includes("biz")) {
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      console.log(`route 1`)
-      returnMessage = await sendMessage('bizRuleDirection', sessionId)
-    } else {
-      console.log(`route 2`)
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let routes = await apiHandler.getRoutes(response.parameters)
-      // console.log(`routes: ${JSON.stringify(routes.data)}`)
-      returnMessage = 
-`${dialogFlowFulfillmentMessage}
-${routes}`
-    }
-  } else if (intent == 'direction') {
-    console.log(`direction`)
-    if (dialogFlowFulfillmentMessage.includes("biz")) {
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      console.log(`direction 1`)
-      returnMessage = await sendMessage('bizRuleStop', sessionId)
-    } else {
-      console.log(`direction 2`)
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let direction = await apiHandler.inoutboundstops(response.parameters)
-      // console.log(`direction: ${JSON.stringify(direction.data)}`)
-      returnMessage = 
-`${dialogFlowFulfillmentMessage}
-${direction}`
-    }
-
-  } else if (intent == 'stop') {
-    console.log(`askStop`)
-    if (dialogFlowFulfillmentMessage.includes("biz")) {
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let param: any
-      console.log(`dialogFlowFulfillmentMessage = ${JSON.stringify(dialogFlowFulfillmentMessage)}`)
-      console.log(`outputContexts = ${JSON.stringify(outputContexts)}`)
-
-      outputContexts.forEach((outputContext: { name: { include: (arg0: string) => any } }) => {
-        console.log(`outputContext = ${JSON.stringify(outputContext)}`)
-        let outputContextName = `${outputContext.name}`
-        console.log(`outputContextName = ${JSON.stringify(outputContextName)}`)
-        if (outputContextName.includes('testfollowupintent-followup')) {
-          param = outputContext
-          console.log(`param = ${JSON.stringify(param)}`)
-
-        }
-      });
-      // console.log(`param2 = ${JSON.stringify(param)}`)
-      // let params = outputContexts
-      let eta = await apiHandler.getEta(response.parameters)
-      
-      returnMessage = eta
-      console.log(`askStop 1`)
-      // returnMessage= await sendMessage('askStop', sessionId)
-    } else {
-      console.log(`askStop 2`)
-      console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
-      let stops = await apiHandler.mtrStops(response.parameters)
-      // console.log(`stops: ${JSON.stringify(stops.data)}`)
-      returnMessage =  
-`
-${dialogFlowFulfillmentMessage}
-${stops}
-`    
-    }
-
-  }
   return returnMessage
 }
 
@@ -312,7 +108,7 @@ function start(client: Client) {
       // const content = `Please send us a photo to turn it into a sticker!
 
       console.log(`before sendMessageResponse`)
-      const sendMessageResponse = await sendMessage(message.body, message.from)
+      const sendMessageResponse = await sendMessage(message.body, message.from+"1")
       console.log(`sendMessageResponse: ${sendMessageResponse}`)
       let content = ''
       //Support us by forwarding this Robot to your friends: https://wa.me/85260714187?text=I'm%20referred%20by%${message.from}`

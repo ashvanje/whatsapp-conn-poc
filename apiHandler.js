@@ -8,7 +8,7 @@ const express = require('express')
 const googleAuth = require('google-oauth-jwt')
 const axios = require('axios')
 
-function enquiryToCompany(enquiry: any) {
+function enquiryToCompany(enquiry) {
     if (enquiry == 1) {
         return "MTR"
     } else if (enquiry == 2) {
@@ -18,7 +18,7 @@ function enquiryToCompany(enquiry: any) {
     }
 }
 
-function companyToEnquiry(enquiry: any) {
+function companyToEnquiry(enquiry) {
     if (enquiry == "MTR") {
         return "1"
     } else if (enquiry == "Citybus") {
@@ -28,7 +28,7 @@ function companyToEnquiry(enquiry: any) {
     }
 }
 
-function mtrLineMapper(route: any) {
+function mtrLineMapper(route) {
     switch (route) {
         case "1":
             return "TCL"
@@ -42,7 +42,7 @@ function mtrLineMapper(route: any) {
             return ""
     }
 }
-async function getRoutes(params: any) {
+async function getRoutes(params) {
     console.log(`getRoutes!!!!!!!!!!!!!!`)
     console.log(`getRoutes!!!!!!!!!!!!!! ${JSON.stringify(params)}`)
     let company = enquiryToCompany(params.enquiry)
@@ -75,7 +75,7 @@ async function getRoutes(params: any) {
     }
 }
 
-async function inoutboundstops(params: any) {
+async function inoutboundstops(params) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     console.log(`(params.route): ${(params.route)}`)
@@ -106,7 +106,7 @@ async function inoutboundstops(params: any) {
 }
 
 
-async function mtrStops(params: any) {
+async function mtrStops(params) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     let line = company=="MTR"?mtrLineMapper(params.route):params.route
@@ -132,7 +132,7 @@ async function mtrStops(params: any) {
 }
 
 
-async function callMtrStopsAPI(params: any) {
+async function callMtrStopsAPI(params) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     let line = company=="MTR"?mtrLineMapper(params.route):params.route
@@ -179,7 +179,7 @@ async function callMtrStopsAPI(params: any) {
     return stops.data
 }
 
-async function getEta(params: any) {
+async function getEta(params) {
     let company = enquiryToCompany(params.enquiry)
     let stationCode = params.stop
     let line = company=="MTR"?mtrLineMapper(params.route):params.route
