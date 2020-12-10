@@ -112,13 +112,47 @@ async function mtrStops(params: any) {
     let line = company=="MTR"?mtrLineMapper(params.route):params.route
     let direction = params.direction
     let url = ''
+    let stops = await callMtrStopsAPI(params)
+    console.log(`stops: ${JSON.stringify(stops)}`)
+    let resultString = ``
+    let i = 1
+    for (var element of stops) {
+        console.log(`element: ${JSON.stringify(element)}`)
+        if (company == 'MTR') {
+            resultString = resultString +
+`${i++} ${element.stopName} (${element.stationCode})
+`
+        } else {
+            resultString = resultString +
+`${i++} ${element.stopName}
+`
+        }
+    }
+    return resultString
+}
+
+
+async function callMtrStopsAPI(params: any) {
+    let company = enquiryToCompany(params.enquiry)
+    let stationCode = params.stop
+    let line = company=="MTR"?mtrLineMapper(params.route):params.route
+    let direction = params.direction
+    let url = ''
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
     if (company == 'MTR') {
         url='/mtrStops'
-        if (direction == 1) {
-            direction = 'up'
+        if (line == 'TKL' || line == 'WRL') {
+            if (direction == 1) {
+                direction = 'DT'
+            } else {
+                direction = 'UT'
+            }
         } else {
-            direction = 'down'
+            if (direction == 1) {
+                direction = 'up'
+            } else {
+                direction = 'down'
+            }
         }
     } else {
         url='/citybusStops'
@@ -142,21 +176,7 @@ async function mtrStops(params: any) {
         }
     })
     console.log(`stops: ${JSON.stringify(stops.data)}`)
-    let resultString = ``
-    let i = 1
-    for (var element of stops.data) {
-        console.log(`element: ${JSON.stringify(element)}`)
-        if (company == 'MTR') {
-            resultString = resultString +
-`${i++} ${element.stopName} (${element.stationCode})
-`
-        } else {
-            resultString = resultString +
-`${i++} ${element.stopName}
-`
-        }
-    }
-    return resultString
+    return stops.data
 }
 
 async function getEta(params: any) {
@@ -168,13 +188,25 @@ async function getEta(params: any) {
     let data
     console.log(`params in apiHandler: ${JSON.stringify(params)}`)
     if (company == 'MTR') {
+        let stops = await callMtrStopsAPI(params)
+        console.log(`stationCode: ${stationCode}`)
+        stationCode = stops[parseInt(stationCode)-1].stationCode
         url='/mtrStops'
-        if (direction == 1) {
-            direction = 'up'
-        } else {
-            direction = 'down'
-        }
+        // if (line == 'TKL' || line == 'WRL') {
+        //     if (direction == 1) {
+        //         direction = 'DT'
+        //     } else {
+        //         direction = 'UT'
+        //     }
+        // } else {
+            if (direction == 1) {
+                direction = 'up'
+            } else {
+                direction = 'down'
+            }
+        // }
         data = { "company": company, "boundFor": direction, "stationCode": stationCode, "line": line }
+        console.log(`data: ${JSON.stringify(data)}`)
     } else {
         url='/citybusStops'
         if (direction == 1) {

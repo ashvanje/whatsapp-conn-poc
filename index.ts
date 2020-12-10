@@ -150,7 +150,12 @@ async function sendMessage(userText: any, sessionId: any) {
       console.log(`response.parameters: ${JSON.stringify(response.parameters)}`)
       // let routes = await getRoutes()
       let testString = 
-`${dialogFlowFulfillmentMessage}
+// `${dialogFlowFulfillmentMessage}
+// `
+`What type of transport are you taking?
+1) MTR
+2) Citybus
+3) NWFB
 `
       returnMessage = testString
     }
@@ -166,10 +171,8 @@ async function sendMessage(userText: any, sessionId: any) {
       let routes = await apiHandler.getRoutes(response.parameters)
       // console.log(`routes: ${JSON.stringify(routes.data)}`)
       returnMessage = 
-`
-${dialogFlowFulfillmentMessage}
-${routes}
-`
+`${dialogFlowFulfillmentMessage}
+${routes}`
     }
   } else if (intent == 'direction') {
     console.log(`direction`)
@@ -183,10 +186,8 @@ ${routes}
       let direction = await apiHandler.inoutboundstops(response.parameters)
       // console.log(`direction: ${JSON.stringify(direction.data)}`)
       returnMessage = 
-`
-${dialogFlowFulfillmentMessage}
-${direction}
-`
+`${dialogFlowFulfillmentMessage}
+${direction}`
     }
 
   } else if (intent == 'stop') {
