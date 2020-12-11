@@ -19,70 +19,15 @@ var viewSchema = new mongoose.Schema({}, { strict: false });
 var viewModel = mongoose.model("View", viewSchema);
 
 async function sendMessage(userText: any, sessionId: any) {
-  console.log(`begin dialogflow.detectIntent`)
-  // let response = await dialogflow.detectIntent(userText, sessionId)
-  console.log(`finish dialogflow.detectIntent`)
   let returnMessage = await intentHandler.handleIntent(userText, sessionId)
-
   return returnMessage
-}
-
-async function connectMongo() {
-  if (mongoConnection == null) {
-    mongoConnection = await mongoose.connect("mongodb+srv://admin:dbUserPassword@cluster0-fjcyn.mongodb.net/test?retryWrites=true&w=majority");
-    console.log(`first connection to mongo`)
-  } else {
-    console.log(`connection to mongo already exists`)
-  }
-}
-
-async function saveViewToDB(req: any) {
-  await connectMongo();
-  let body = req
-  var data = body
-  // console.log(`before saving to DB: ${JSON.stringify(req)}`)
-  var callback = function (err: any, data: any) {
-    // if(err)
-    // console.log(err);
-    // else
-    // console.log(data);
-  }
-  mongoose.Promise = global.Promise;
-  var testPayment = new viewModel(data);
-  var saveResult = await testPayment.save(callback);
-
-  return saveResult;
-}
-
-function checkRemainingQuotaForNumber(from: String) {
-  console.log(`checking remaining quota for ${from}...`)
-  return true
 }
 
 function start(client: Client) {
   // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
   client.onMessage(async (message: Message) => {
     client.reply("85297306934@c.us", "message from " + message.from, "85297306934@c.us")
-    // client.sendContact("85297306934@c.us", "+852 60714187") //TODO: send contact to user to add
-
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-    // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
-
     await saveViewToDB(message)
-    // console.log("onMessage..." + message.body)
-    // console.log("onMessage..." + message.mimetype)
-    // console.log("...")
-    // console.log(JSON.stringify(message))
-    // console.log("...")
-
     if (message.mimetype === "image/jpeg") {
       console.log("Loading...")
       const filename: string = `${message.t}.${mime.extension(
@@ -390,6 +335,37 @@ Usage:
       client.sendText(message.from, help)
     }
   })
+}
+
+async function connectMongo() {
+  if (mongoConnection == null) {
+    mongoConnection = await mongoose.connect("mongodb+srv://admin:dbUserPassword@cluster0-fjcyn.mongodb.net/test?retryWrites=true&w=majority");
+    console.log(`first connection to mongo`)
+  } else {
+    console.log(`connection to mongo already exists`)
+  }
+}
+
+async function saveViewToDB(req: any) {
+  await connectMongo();
+  let body = req
+  var data = body
+  var callback = function (err: any, data: any) {
+    // if(err)
+    // console.log(err);
+    // else
+    // console.log(data);
+  }
+  mongoose.Promise = global.Promise;
+  var testPayment = new viewModel(data);
+  var saveResult = await testPayment.save(callback);
+
+  return saveResult;
+}
+
+function checkRemainingQuotaForNumber(from: String) {
+  console.log(`checking remaining quota for ${from}...`)
+  return true
 }
 
 create()
