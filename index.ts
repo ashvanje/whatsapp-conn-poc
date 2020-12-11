@@ -108,7 +108,7 @@ function start(client: Client) {
       // const content = `Please send us a photo to turn it into a sticker!
 
       console.log(`before sendMessageResponse`)
-      const sendMessageResponse = await sendMessage(message.body, message.from+"1")
+      const sendMessageResponse = await sendMessage(message.body, message.from+"5")
       console.log(`sendMessageResponse: ${sendMessageResponse}`)
       let content = ''
       //Support us by forwarding this Robot to your friends: https://wa.me/85260714187?text=I'm%20referred%20by%${message.from}`

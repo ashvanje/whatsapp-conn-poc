@@ -7,8 +7,12 @@ var model = mongoose.model("citybusroutes", schema);
 var citybusfullstopsschema = new mongoose.Schema({}, { strict: false });
 var citybusfullstopsmodel = mongoose.model("citybusfullstops", citybusfullstopsschema);
 
+var govhkmtrstopschema = new mongoose.Schema({}, { strict: false });
+var govhkmtrstopmodel = mongoose.model("govhkmtrstop", govhkmtrstopschema);
 
 var mongoConnection;
+
+const apiHandler = require('./apiHandler')
 
 const TimeDiff = (startTime, endTime, format) => {
 
@@ -255,6 +259,77 @@ async function getCitybusETAByStop(stopId) {
   
 }
 
+async function getMtrRoutesByMtrStop(mtrStop) {
+
+  // var govhkmtrstopschema = new mongoose.Schema({}, { strict: false });
+  // var govhkmtrstopmodel = mongoose.model("govhkmtrstop", govhkmtrstopschema);
+  await connectMongo();
+  var callback = function (err, data) {
+    if (err)
+      console.log(err);
+    else
+      console.log(data);
+  }
+
+  // var testPayment = new citybusfullstopsmodel();
+  console.log(`mtrStop: ${JSON.stringify(mtrStop)}`)
+  var routes = await govhkmtrstopmodel.find({stationCode: mtrStop}, callback)
+  //line
+  //bound
+  console.log(`routes: ${JSON.stringify(routes)}`)
+  let responseArr = []
+  if (routes.length > 0) {
+    for (var route of routes) {
+      console.log(`1`)
+      let direction = route.get('bound')
+      console.log(`2`)
+      let stationCode = mtrStop
+      console.log(`3`)
+      let line =  route.get('line')
+      console.log(`4`)
+  
+      // if (line == 'TKL' || line == 'WRL') {
+          if (direction == 'DT') {
+            direction = 'down'
+      } else {
+              direction = 'up'
+          
+      }
+    // }
+  
+      let data = { "company": "MTR", "boundFor": direction, "stationCode": stationCode, "line": line }
+  
+      console.log(`5`)
+      console.log(`data=${JSON.stringify(data)}`)
+      let etaArr = await axios.post(`http://whenarrive.com/getEta`, data, {
+        content: JSON,
+        content_type: 'application/json',
+        expect_type: 'text/plain',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(`etaArr=${JSON.stringify(etaArr.data)}`)
+      for (var eta of etaArr.data) {
+      responseArr.push(eta)
+      }
+    }
+    console.log(`responseArr=${JSON.stringify(responseArr)}`)
+    let resultString = ``
+    for (var element of responseArr) {
+      console.log(`element: ${JSON.stringify(element)}`)
+      resultString = resultString +
+  `To: ${element.destination} Arrive In: ${element.minutesLeft}
+  
+  `
+  }
+    return resultString
+  } else {
+    return 0
+  }
+  
+}
+
 module.exports = {
   connectMongo:connectMongo,
   getCitybusRouteStops:getCitybusRouteStops,
@@ -263,5 +338,6 @@ module.exports = {
   getEtaByStopId:getEtaByStopId,
   saveAllCitybusRoutes:saveAllCitybusRoutes,
   saveCitybusFullStops:saveCitybusFullStops,
-  getCitybusETAByStop: getCitybusETAByStop
+  getCitybusETAByStop: getCitybusETAByStop,
+  getMtrRoutesByMtrStop:getMtrRoutesByMtrStop
 };
