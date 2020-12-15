@@ -26,7 +26,7 @@ async function sendMessage(userText: any, sessionId: any) {
 function start(client: Client) {
   // client.reply("85260714187@c.us", "this is not a marketing message", "85297306934@c.us")
   client.onMessage(async (message: Message) => {
-    client.reply("85297306934@c.us", "message from " + message.from, "85297306934@c.us")
+    // client.reply("85260714187@c.us", "message from " + message.from, "85265954435@c.us")
     await saveViewToDB(message)
     if (message.mimetype === "image/jpeg") {
       console.log("Loading...")

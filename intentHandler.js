@@ -14,29 +14,33 @@ async function handleIntent(userText, sessionId) {
   let returnMessage = ''
 
   let response = await dialogflow.detectIntent(userText, sessionId)
+  console.log(`response: ${JSON.stringify(response)}`)
   let dialogFlowFulfillmentMessage = `${response.dialogFlowFulfillmentMessage}`
+  console.log(`dialogFlowFulfillmentMessage = ${dialogFlowFulfillmentMessage}`)
   let outputContexts = response.outputContexts
+  console.log(`outputContexts = ${JSON.stringify(outputContexts)}`)
   let intent = `${response.intent}`
 
 
   let default_welcome_intent = 'Default Fallback Intent'
   if (intent == default_welcome_intent) {
-    // var term = "sample1";
-    var re = new RegExp("^[0-9]{1,6}$");
-    if (re.test(userText)) {
-        console.log("6 digit number");
-        returnMessage = await searchCTBStopEta(userText, sessionId)
+    console.log(`intent == default_welcome_intent`)
+    // returnMessage = await getMtrRoutesByMtrStopChinese(userText, sessionId)
+    returnMessage = "HELLO"
+    console.log(`returnMessage = ${returnMessage}`)
 
-    } else {
-      console.log("not 6 digit number");
-      returnMessage = await searchMtrStopEta(userText, sessionId)
-      if (returnMessage == '0') {
-        returnMessage = await handleIntent('I want to make an enquiry', sessionId)
-      }
-    }
-    //if regex number -> search citybus stop
-    //else if character -> search mtr stop
-    //else -> call guided flow
+    // var re = new RegExp("^[0-9]{1,6}$");
+    // if (re.test(userText)) {
+    //     console.log("6 digit number");
+    //     returnMessage = await searchCTBStopEta(userText, sessionId)
+
+    // } else {
+    //   console.log("not 6 digit number");
+    //   returnMessage = await searchMtrStopEta(userText, sessionId)
+    //   if (returnMessage == '0') {
+    //     returnMessage = await handleIntent('I want to make an enquiry', sessionId)
+    //   }
+    // }
   }
 
   if (intent == 'searchStopEta') {
@@ -171,6 +175,12 @@ async function availableEnquiries(response, sessionId) {
     return returnMessage
   }
   
+  
+  async function getMtrRoutesByMtrStopChinese(userText, sessionId) {
+    let routes = await db.getMtrRoutesByMtrStopChinese(userText)
+    let returnMessage = routes
+    return returnMessage
+  }
 
 
   async function stop(response, sessionId) {

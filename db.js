@@ -10,6 +10,9 @@ var govhkmtrstopschema = new mongoose.Schema({}, { strict: false });
 var govhkmtrstopmodel = mongoose.model("govhkmtrstop", govhkmtrstopschema);
 var mongoConnection;
 
+var mtrStopSchema = new mongoose.Schema({line:String, bound:String, stationName:String, stationCode: String});
+var mtrStopModel = mongoose.model("MtrStop", mtrStopSchema);
+
 async function getCitybusStopByStopId(stopId) {
   await connectMongo();
   let routesByStopId = await citybusfullstopsmodel.find({ 'stop': stopId }, function (err, data) {
@@ -171,6 +174,162 @@ async function getMtrRoutesByMtrStop(mtrStop) {
   
 }
 
+
+
+async function getMtrRoutesByMtrStopChinese(mtrStop) {
+
+  // var govhkmtrstopschema = new mongoose.Schema({}, { strict: false });
+  // var govhkmtrstopmodel = mongoose.model("govhkmtrstop", govhkmtrstopschema);
+  await connectMongo();
+  var callback = function (err, data) {
+    if (err)
+      console.log(err);
+    else
+      console.log(data);
+  }
+
+  // var testPayment = new citybusfullstopsmodel();
+  console.log(`mtrStop: ${JSON.stringify(mtrStop)}`)
+  var routes = await govhkmtrstopmodel.find({stationChineseName: mtrStop}, callback)
+  //line
+  //bound
+  console.log(`routes: ${JSON.stringify(routes)}`)
+  let responseArr = []
+  if (routes.length > 0) {
+    for (var route of routes) {
+      console.log(`1`)
+      let direction = route.get('bound')
+      console.log(`2`)
+      let stationCode = route.get('stationCode')
+      console.log(`3`)
+      let line =  route.get('line')
+      console.log(`4`)
+  
+      let data = { "company": "MTR", "boundFor": direction, "stationCode": stationCode, "line": line }
+  
+      console.log(`5`)
+      console.log(`data=${JSON.stringify(data)}`)
+      console.log(`line=${line}`)
+      console.log(`stationCode=${stationCode}`)
+      console.log(`mtrStop!=${mtrStop}`)
+      // let etaArr = await getMtrETA(line, stationCode, mtrStop)
+      let etaArr = await getMtrETA('TCL', 'NAC', 'NAM CHEONG')
+      console.log(`etaArr=${JSON.stringify(etaArr)}`)
+      for (var eta of etaArr) {
+      responseArr.push(eta)
+      }
+    }
+    console.log(`responseArr=${JSON.stringify(responseArr)}`)
+    let resultString = ``
+    for (var element of responseArr) {
+      console.log(`element: ${JSON.stringify(element)}`)
+      resultString = resultString +
+`Train To: ${element.destination} Will Arrive In: ${element.minutesLeft}
+`
+  }
+    return resultString
+  } else {
+    return 0
+  }
+  
+}
+
+async function getMtrETA2(line, station, stationName) {
+  
+  console.log(`...getMtrETA`)
+}
+
+async function getMtrETA(line, station, stationName) {
+  console.log(`...getMtrETA`)
+  console.log(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${line}&sta=${station}`)
+  let response = await axios.get(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${line}&sta=${station}`, {
+    params: {
+    }
+  });
+  //below for testing
+  // let response = {data:{ "status": 1, "message": "successful", "curr_time": "2020-03-03 15:37:53", "sys_time": "2020-03-03 15:37:53", "isdelay": "N", "data": { "TCL-NAC": { "curr_time": "2020-03-03 15:37:53", "sys_time": "2020-03-03 15:37:53", "UP": [{ "ttnt": "2", "valid": "Y", "plat": "3", "time": "2020-03-03 15:39:00", "source": "-", "dest": "NAC", "seq": "1" }, { "ttnt": "9", "valid": "Y", "plat": "3", "time": "2020-03-03 15:47:00", "source": "+", "dest": "NAC", "seq": "2" }, { "ttnt": "17", "valid": "Y", "plat": "3", "time": "2020-03-03 15:55:00", "source": "+", "dest": "TUC", "seq": "3" }, { "ttnt": "26", "valid": "Y", "plat": "3", "time": "2020-03-03 16:04:00", "source": "+", "dest": "TUC", "seq": "4" }], "DOWN": [{ "ttnt": "0", "valid": "Y", "plat": "4", "time": "2020-03-03 15:37:00", "source": "-", "dest": "HOK", "seq": "1" }, { "ttnt": "6", "valid": "Y", "plat": "4", "time": "2020-03-03 15:43:00", "source": "-", "dest": "HOK", "seq": "2" }, { "ttnt": "15", "valid": "Y", "plat": "4", "time": "2020-03-03 15:52:00", "source": "-", "dest": "HOK", "seq": "3" }, { "ttnt": "22", "valid": "Y", "plat": "4", "time": "2020-03-03 16:00:00", "source": "+", "dest": "HOK", "seq": "4" }] } } }
+  // }
+  console.log(`mtr response from data.gov.hk= ${JSON.stringify(response.data)}`)
+  let responseArr = [];
+  let lineStationElement = line + '-' + station
+  let upDown = 'UP'
+  console.log(`line-station: ${line}-${station}, upDown: ${upDown}`)
+
+  for (var i = 0; i < (response.data.data[`${line}-${station}`][upDown].length); i++) {
+    let destination = await mtrStopByStationCode(line, response.data.data[`${line}-${station}`][upDown][i].dest)
+    console.log(`destination: ${JSON.stringify(destination)}`)
+    console.log(`destination.stationChineseName: ${destination.get('stationChineseName')}`)
+    console.log(`upDown: ${upDown}`)
+    console.log(`line: ${line}`)
+    console.log(`line: ${line}` + response.data.data[`${line}-${station}`][upDown][i].dest)
+    console.log(`line: ${line}` + response.data.data[`${line}-${station}`][upDown][i].time)
+    console.log(`line: ${line}` + response.data.data[`${line}-${station}`][upDown][i].ttnt + ' (' + (new Date(response.data.data[`${line}-${station}`][upDown][i].time)).toLocaleTimeString() + ') ')
+    
+    console.log(`stopName: ${stationName}`)
+    console.log(`destination.get('stationChineseName'): ${destination.get('stationChineseName')}`)
+    let data = {
+      company: 'MTR',
+      bound: upDown,
+      route: line,
+      dir: response.data.data[`${line}-${station}`][upDown][i].dest,
+      eta: response.data.data[`${line}-${station}`][upDown][i].time,
+      minutesLeft: response.data.data[`${line}-${station}`][upDown][i].ttnt + ' (' + (new Date(response.data.data[`${line}-${station}`][upDown][i].time)).toLocaleTimeString() + ') ',
+      stopName: stationName,
+      destination: destination.get('stationChineseName')
+    }
+    console.log('data from backend = ' + JSON.stringify(data))
+    responseArr.push(
+      data
+    )
+  }
+
+  
+  upDown = 'DOWN'
+  
+  for (var i = 0; i < (response.data.data[`${line}-${station}`][upDown].length); i++) {
+    let destination = await mtrStopByStationCode(line, response.data.data[`${line}-${station}`][upDown][i].dest)
+    console.log(`destination: ${JSON.stringify(destination)}`)
+    console.log(`destination.stationChineseName: ${destination.get('stationChineseName')}`)
+    let data = {
+      company: 'MTR',
+      bound: upDown,
+      route: line,
+      dir: response.data.data[`${line}-${station}`][upDown][i].dest,
+      eta: response.data.data[`${line}-${station}`][upDown][i].time,
+      minutesLeft: response.data.data[`${line}-${station}`][upDown][i].ttnt + ' (' + (new Date(response.data.data[`${line}-${station}`][upDown][i].time)).toLocaleTimeString() + ') ',
+      stopName: stationName,
+      destination: destination.get('stationChineseName')
+    }
+    console.log('data from backend = ' + JSON.stringify(data))
+    responseArr.push(
+      data
+    )
+  }
+
+  
+  return responseArr
+
+}
+
+
+
+async function mtrStopByStationCode (route, stationCode) {
+
+  await connectMongo();
+  
+  console.log(`route: ${route}, stationCode: ${stationCode}`)
+  // var callback = function(err,data){
+  //   if(err)
+  //     console.log(`error: ${err}`);
+  //   else
+  //     console.log(`data: ${data}`);
+  // }
+  mongoose.Promise = global.Promise;
+  const stop = await mtrStopModel.findOne({'line':route, 'stationCode':stationCode}, function (err, obj) { console.log(`data ${JSON.stringify(obj)}`); });
+  console.log(`stops: ${JSON.stringify(stop)}`)
+  return stop;
+}
+
 ////////////////////////
 
 const TimeDiff = (startTime, endTime, format) => {
@@ -191,5 +350,6 @@ async function connectMongo() {
 
 module.exports = {
   getCitybusETAByStop: getCitybusETAByStop,
-  getMtrRoutesByMtrStop:getMtrRoutesByMtrStop
+  getMtrRoutesByMtrStop:getMtrRoutesByMtrStop,
+  getMtrRoutesByMtrStopChinese: getMtrRoutesByMtrStopChinese
 };
