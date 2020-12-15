@@ -25,8 +25,8 @@ async function handleIntent(userText, sessionId) {
   let default_welcome_intent = 'Default Fallback Intent'
   if (intent == default_welcome_intent) {
     console.log(`intent == default_welcome_intent`)
-    // returnMessage = await getMtrRoutesByMtrStopChinese(userText, sessionId)
-    returnMessage = "HELLO"
+    returnMessage = await getMtrRoutesByMtrStopChinese(userText, sessionId)
+    // returnMessage = "HELLO"
     console.log(`returnMessage = ${returnMessage}`)
 
     // var re = new RegExp("^[0-9]{1,6}$");

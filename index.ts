@@ -73,7 +73,8 @@ function start(client: Client) {
       console.log(`message.chatId: ${message.chatId}`)
       // const replyMsg = content
       // console.log(`replyMsg: ${JSON.stringify(content)}`)
-      client.reply(message.from, `${content}`, message.chatId)
+      client.sendText(message.from, `${content}`)
+      // client.reply(message.from, `${content}`, message.chatId)
       console.log("Sent!")
     }
 

@@ -190,7 +190,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
 
   // var testPayment = new citybusfullstopsmodel();
   console.log(`mtrStop: ${JSON.stringify(mtrStop)}`)
-  var routes = await govhkmtrstopmodel.find({stationChineseName: mtrStop}, callback)
+  var routes = await govhkmtrstopmodel.find({stationChineseName: mtrStop,bound:'DT'}, callback) //to prevent retrieving both DT and UT
   //line
   //bound
   console.log(`routes: ${JSON.stringify(routes)}`)
@@ -212,8 +212,8 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
       console.log(`line=${line}`)
       console.log(`stationCode=${stationCode}`)
       console.log(`mtrStop!=${mtrStop}`)
-      // let etaArr = await getMtrETA(line, stationCode, mtrStop)
-      let etaArr = await getMtrETA('TCL', 'NAC', 'NAM CHEONG')
+      let etaArr = await getMtrETA(line, stationCode, mtrStop)
+      // let etaArr = await getMtrETA('TCL', 'NAC', 'NAM CHEONG')
       console.log(`etaArr=${JSON.stringify(etaArr)}`)
       for (var eta of etaArr) {
       responseArr.push(eta)
@@ -224,7 +224,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
     for (var element of responseArr) {
       console.log(`element: ${JSON.stringify(element)}`)
       resultString = resultString +
-`Train To: ${element.destination} Will Arrive In: ${element.minutesLeft}
+`${mtrLineCodeToChineseName(element.route)}Train To: ${element.destination} Will Arrive In: ${element.minutesLeft}
 `
   }
     return resultString
@@ -232,6 +232,17 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
     return 0
   }
   
+}
+
+function mtrLineCodeToChineseName(line) {
+  if (line == 'AEL') {
+    return '機場快線'
+  } else if (line == 'TCL') {
+    return '東涌線'
+
+  } else {
+    return line
+  }
 }
 
 async function getMtrETA2(line, station, stationName) {
@@ -255,6 +266,7 @@ async function getMtrETA(line, station, stationName) {
   let upDown = 'UP'
   console.log(`line-station: ${line}-${station}, upDown: ${upDown}`)
 
+  if (response.data.data[`${line}-${station}`][upDown]){
   for (var i = 0; i < (response.data.data[`${line}-${station}`][upDown].length); i++) {
     let destination = await mtrStopByStationCode(line, response.data.data[`${line}-${station}`][upDown][i].dest)
     console.log(`destination: ${JSON.stringify(destination)}`)
@@ -282,10 +294,12 @@ async function getMtrETA(line, station, stationName) {
       data
     )
   }
+}
 
   
   upDown = 'DOWN'
   
+  if (response.data.data[`${line}-${station}`][upDown]){
   for (var i = 0; i < (response.data.data[`${line}-${station}`][upDown].length); i++) {
     let destination = await mtrStopByStationCode(line, response.data.data[`${line}-${station}`][upDown][i].dest)
     console.log(`destination: ${JSON.stringify(destination)}`)
@@ -305,7 +319,7 @@ async function getMtrETA(line, station, stationName) {
       data
     )
   }
-
+  }
   
   return responseArr
 
