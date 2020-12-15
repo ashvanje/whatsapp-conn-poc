@@ -205,6 +205,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
       let line =  route.get('line')
       console.log(`4`)
   
+      if (line == 'AEL' || line == 'TKL' || line == 'TCL' || line == 'WRL') {
       let data = { "company": "MTR", "boundFor": direction, "stationCode": stationCode, "line": line }
   
       console.log(`5`)
@@ -212,33 +213,57 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
       console.log(`line=${line}`)
       console.log(`stationCode=${stationCode}`)
       console.log(`mtrStop!=${mtrStop}`)
-      let etaArr = await getMtrETA(line, stationCode, mtrStop)
+      let etaArr
+        etaArr = await getMtrETA(line, stationCode, mtrStop)
+      
       // let etaArr = await getMtrETA('TCL', 'NAC', 'NAM CHEONG')
       console.log(`etaArr=${JSON.stringify(etaArr)}`)
-      for (var eta of etaArr) {
-      responseArr.push(eta)
-      }
+      // for (var eta of etaArr) {
+      responseArr.push({
+        line: line,
+        eta: etaArr
+      })
+      // }
+    }
     }
     console.log(`responseArr=${JSON.stringify(responseArr)}`)
     let resultString = ``
-    for (var element of responseArr) {
-      console.log(`element: ${JSON.stringify(element)}`)
-      resultString = resultString +
-`${mtrLineCodeToChineseName(element.route)}Train To: ${element.destination} Will Arrive In: ${element.minutesLeft}
-`
+    for (var response of responseArr) {
+      console.log(`response=${JSON.stringify(response)}`)
+      resultString = resultString + `
+${mtrLineCodeToChineseName(response.line)}
+   `
+      for (var element of response.eta) {
+        console.log(`element=${JSON.stringify(element)}`)
+        resultString = resultString + `${element.destination}:${splitMinutesLeft(element.minutesLeft)}||`
+      }
+//       console.log(`element: ${JSON.stringify(element)}`)
+//       resultString = resultString +
+// `${mtrLineCodeToChineseName(element.route)}Train To: ${element.destination} Will Arrive In: ${element.minutesLeft}
+// `
   }
     return resultString
   } else {
-    return 0
+    return '只支援 機場快線 / 東涌線 / 將軍澳線 / 西鐵線'
   }
   
 }
 
+function splitMinutesLeft(minutesLeft) {
+  let minLeft= minutesLeft.split(' ')[0]
+  let timeStamp = minutesLeft.split(' ')[1]
+  let shortTimeStamp = timeStamp.split(':00 ') [0]
+  return minLeft + shortTimeStamp + ')'
+}
 function mtrLineCodeToChineseName(line) {
   if (line == 'AEL') {
     return '機場快線'
   } else if (line == 'TCL') {
     return '東涌線'
+  } else if (line == 'TKL') {
+    return '將軍澳線'
+  } else if (line == 'WRL') {
+    return '西鐵線'
 
   } else {
     return line
