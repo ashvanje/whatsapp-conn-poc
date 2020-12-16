@@ -184,6 +184,15 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
     else
       console.log(data);
   }) //to prevent retrieving both DT and UT
+  if (routes.length == 0) {
+    routes = await govhkmtrstopmodel.find({ stationName: mtrStop, bound: 'DT' }, function (err, data) {
+      if (err)
+        console.log(err);
+      else
+        console.log(data);
+    }) //to prevent retrieving both DT and UT
+  
+  }
   let responseArr = []
   if (routes.length > 0) {
     //For each route, get the MTR ETA
@@ -217,7 +226,7 @@ ${mtrLineCodeToChineseName(response.line) + emoji.find('train').emoji} 往
     if (response.eta[0].eta.length > 0) { //handle up
       for (var element of response.eta[0].eta) { //handle each station of up e.g. lohas park and TKO
         //element example: {station:'LOHAS PARK', eta: {destination, minutesLeft...}}
-        resultString = resultString + `${element.station} `
+        resultString = resultString + `${element.station} ${element.stationEn} `
         for (var eta of element.eta) {
           resultString = resultString + `${splitMinutesLeft(eta.minutesLeft)} `
         }
@@ -229,7 +238,7 @@ ${mtrLineCodeToChineseName(response.line) + emoji.find('train').emoji} 往
     if (response.eta[1].eta.length > 0) {
       for (var element of response.eta[1].eta) { //loop station e.g. lohas park and TKO
         //element example: {station:'LOHAS PARK', eta: {destination, minutesLeft...}}
-        resultString = resultString + `${element.station} `
+        resultString = resultString + `${element.station} ${element.stationEn} `
         for (var eta of element.eta) {
           resultString = resultString + `${splitMinutesLeft(eta.minutesLeft)} `
         }
@@ -250,13 +259,13 @@ function splitMinutesLeft(minutesLeft) {
 
 function mtrLineCodeToChineseName(line) {
   if (line == 'AEL') {
-    return '機場快線'
+    return '機場快線 Airport Express'
   } else if (line == 'TCL') {
-    return '東涌線'
+    return '東涌線 Tung Chung Line'
   } else if (line == 'TKL') {
-    return '將軍澳線'
+    return '將軍澳線 Tseung Kwan O Line'
   } else if (line == 'WRL') {
-    return '西鐵線'
+    return '西鐵線 West Rail Line'
   } else {
     return line
   }
@@ -284,7 +293,8 @@ async function getMtrETA(line, station, stationName) {
         eta: response.data.data[`${line}-${station}`][upDown][i].time,
         minutesLeft: response.data.data[`${line}-${station}`][upDown][i].ttnt + ' (' + (new Date(response.data.data[`${line}-${station}`][upDown][i].time)).toLocaleTimeString() + ') ',
         stopName: stationName,
-        destination: destination.get('stationChineseName')
+        destination: destination.get('stationChineseName'),
+        destinationEn: destination.get('stationName')
       }
       upArr.push(
         data
@@ -306,7 +316,8 @@ async function getMtrETA(line, station, stationName) {
         eta: response.data.data[`${line}-${station}`][upDown][i].time,
         minutesLeft: response.data.data[`${line}-${station}`][upDown][i].ttnt + ' (' + (new Date(response.data.data[`${line}-${station}`][upDown][i].time)).toLocaleTimeString() + ') ',
         stopName: stationName,
-        destination: destination.get('stationChineseName')
+        destination: destination.get('stationChineseName'),
+        destinationEn: destination.get('stationName')
       }
       downArr.push(
         data
@@ -328,10 +339,11 @@ function groupByDestination (array) {
   var uniq = _.uniq(_.map(array, 'destination'))
   console.log(`etaGroupedByStation: ${JSON.stringify(etaGroupedByStation)}`)
   console.log(`uniq: ${JSON.stringify(uniq)}`)
-  for(var station of uniq) {
+  for(var station of uniq) { //protected etaOfStation length > 0
     let etaOfStation = etaGroupedByStation[station]
     resultArr.push({
       station: station,
+      stationEn: etaOfStation[0].destinationEn,
       eta: etaOfStation
     })
   }
