@@ -1,6 +1,6 @@
 
 const apiHandler = require('../apiHandler')
-const db = require('../db')
+const db = require('../citybusHelper')
 const dialogflow = require('../dialogflow')
 const intentHandler = require('../intentHandler')
 async function handleResponse(response, sessionId) {

@@ -9,7 +9,6 @@ const googleAuth = require('google-oauth-jwt')
 const axios = require('axios')
 const dialogflow = require('./dialogflow')
 const apiHandler = require('./apiHandler')
-const db = require('./db')
 const intentHandler = require('./intentHandler')
 
 
