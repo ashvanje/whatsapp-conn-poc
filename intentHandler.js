@@ -10,23 +10,17 @@ async function test(userText, sessionId) {
 }
 
 async function handleIntent(userText, sessionId) {
-    console.log(`handleIntent: userText-${userText}, sessionId-${sessionId}`)
   let returnMessage = ''
 
   let response = await dialogflow.detectIntent(userText, sessionId)
-  console.log(`response: ${JSON.stringify(response, null, 2)}`)
-  let dialogFlowFulfillmentMessage = `${response.dialogFlowFulfillmentMessage}`
-  console.log(`dialogFlowFulfillmentMessage = ${dialogFlowFulfillmentMessage}`)
-  let outputContexts = response.outputContexts
-  console.log(`outputContexts = ${JSON.stringify(outputContexts)}`)
+  // let dialogFlowFulfillmentMessage = `${response.dialogFlowFulfillmentMessage}`
+  // let outputContexts = response.outputContexts
   let intent = `${response.intent}`
-
-
   let default_welcome_intent = 'Default Fallback Intent'
+
   if (intent == default_welcome_intent) {
     console.log(`intent == default_welcome_intent`)
-    returnMessage = await getMtrRoutesByMtrStopChinese(userText, sessionId)
-    // returnMessage = "HELLO"
+    returnMessage = await db.getMtrRoutesByMtrStopChinese(userText)
     console.log(`returnMessage = ${returnMessage}`)
 
     // var re = new RegExp("^[0-9]{1,6}$");
@@ -176,11 +170,11 @@ async function availableEnquiries(response, sessionId) {
   }
   
   
-  async function getMtrRoutesByMtrStopChinese(userText, sessionId) {
-    let routes = await db.getMtrRoutesByMtrStopChinese(userText)
-    let returnMessage = routes
-    return returnMessage
-  }
+  // async function getMtrRoutesByMtrStopChinese(userText, sessionId) {
+  //   let routes = await db.getMtrRoutesByMtrStopChinese(userText)
+  //   let returnMessage = routes
+  //   return returnMessage
+  // }
 
 
   async function stop(response, sessionId) {
