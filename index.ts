@@ -19,8 +19,12 @@ var viewSchema = new mongoose.Schema({}, { strict: false });
 var viewModel = mongoose.model("View", viewSchema);
 
 async function sendMessage(userText: any, sessionId: any) {
+  try {
   let returnMessage = await intentHandler.handleIntent(userText, sessionId)
   return returnMessage
+  } catch (error) {
+    console.log(JSON.stringify(error))
+  }
 }
 
 function start(client: Client) {

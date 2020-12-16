@@ -14,7 +14,7 @@ async function handleIntent(userText, sessionId) {
   let returnMessage = ''
 
   let response = await dialogflow.detectIntent(userText, sessionId)
-  console.log(`response: ${JSON.stringify(response)}`)
+  console.log(`response: ${JSON.stringify(response, null, 2)}`)
   let dialogFlowFulfillmentMessage = `${response.dialogFlowFulfillmentMessage}`
   console.log(`dialogFlowFulfillmentMessage = ${dialogFlowFulfillmentMessage}`)
   let outputContexts = response.outputContexts
