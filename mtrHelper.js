@@ -20,7 +20,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
   if (routes.length == 0) {
     routes = mtrStops.findMtrStopsByStationName(null, mtrStop, 'DT')
   }
-  let responseArr = []
+  let mtrLineArr = []
   if (routes.length > 0) {
     //For each route, get the MTR ETA
     for (var route of routes) {
@@ -31,46 +31,45 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
 
       //Only get ETA if the line is supported
       if (line == 'AEL' || line == 'TKL' || line == 'TCL' || line == 'WRL') {
-        console.log(`line: ${line} get MtrEta`)
         let etaArr = await getMtrETA(line, stationCode, mtrStop)
-        responseArr.push({
+        mtrLineArr.push({
           line: line,
           eta: etaArr // [{direction:up, eta: [{station:xx, eta:},{}...]}, {direction: down, eta...}]
         })
       }
     } // end of looping routes in a station
-    console.log(`responseArr: ${JSON.stringify(responseArr, null, 2)}`)
-    return returnResponseForMtrEta(responseArr)
+    console.log(`mtrLineArr: ${JSON.stringify(mtrLineArr, null, 2)}`)
+    return returnResponseForMtrEta(mtrLineArr)
   } else {
     return '只支援 _機場快線_ / 東涌線 / 將軍澳線 / 西鐵線' + emoji.find('train').emoji
   }
   
 }
 
-function returnResponseForMtrEta(responseArr) {
+function returnResponseForMtrEta(mtrLineArr) {
   let resultString = ``
-  for (var response of responseArr) { //loop line
+  for (var mtrLine of mtrLineArr) { //loop line
     resultString = resultString + `
-${mtrLineCodeToChineseName(response.line) + emoji.find('train').emoji} 往 
+*${mtrLineCodeToChineseName(mtrLine.line) + emoji.find('train').emoji}* 往 To
 `
-    if (response.eta[0].eta.length > 0) { //handle up
-      for (var element of response.eta[0].eta) { //handle each station of up e.g. lohas park and TKO
+    if (mtrLine.eta[0].eta.length > 0) { //handle up
+      for (var element of mtrLine.eta[0].eta) { //handle each station of up e.g. lohas park and TKO
         //element example: {station:'LOHAS PARK', eta: {destination, minutesLeft...}}
         resultString = resultString + `${element.station} ${element.stationEn} `
         for (var eta of element.eta) {
-          resultString = resultString + `${splitMinutesLeft(eta.minutesLeft)} `
+          resultString = resultString + `_${splitMinutesLeft(eta.minutesLeft)}_ `
         }
         resultString = resultString + `
 `
       }
     }
 
-    if (response.eta[1].eta.length > 0) {
-      for (var element of response.eta[1].eta) { //loop station e.g. lohas park and TKO
+    if (mtrLine.eta[1].eta.length > 0) {
+      for (var element of mtrLine.eta[1].eta) { //loop station e.g. lohas park and TKO
         //element example: {station:'LOHAS PARK', eta: {destination, minutesLeft...}}
         resultString = resultString + `${element.station} ${element.stationEn} `
         for (var eta of element.eta) {
-          resultString = resultString + `${splitMinutesLeft(eta.minutesLeft)} `
+          resultString = resultString + `_${splitMinutesLeft(eta.minutesLeft)}_ `
         }
         resultString = resultString + `
 `

@@ -2,6 +2,7 @@
 const apiHandler = require('./apiHandler')
 const mtrHelper = require('./mtrHelper')
 const dialogflow = require('./dialogflow')
+const citybusHelper = require('./citybusHelper')
 
 async function handleIntent(userText, sessionId) {
   let returnMessage = ''
@@ -10,7 +11,16 @@ async function handleIntent(userText, sessionId) {
   let intent = `${response.intent}`
 
   if (intent == 'Default Fallback Intent') {
-    returnMessage = await mtrHelper.getMtrRoutesByMtrStopChinese(userText)
+    try{
+    // returnMessage = `${JSON.stringify(await citybusHelper.postInOutboundStops('CTB', '5X'))}`
+    const stopsOfBus = await citybusHelper.getCitybusRouteStops('5X', 'outbound',0,0,'CTB')
+    const stopsResult = await citybusHelper.getCitybusStopName(stopsOfBus, '5X')
+    returnMessage = `${JSON.stringify(stopsResult)}`
+    } catch (error) {
+      console.log(`error1: ${JSON.stringify(error.message)}`)
+      throw error
+    }
+    // returnMessage = await mtrHelper.getMtrRoutesByMtrStopChinese(userText)
     // var re = new RegExp("^[0-9]{1,6}$");
     // if (re.test(userText)) {
     //     console.log("6 digit number");
