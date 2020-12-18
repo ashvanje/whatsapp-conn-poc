@@ -18,6 +18,7 @@ var viewSchema = new mongoose.Schema({}, { strict: false });
 var viewModel = mongoose.model("View", viewSchema);
 
 function start(client: Client) {
+  let sessionChange='1245125gf1qawefawe'
   //TODO: implement a secret function that transforms image to sticker
 
   client.onMessage(async (message: Message) => {
@@ -45,7 +46,7 @@ function start(client: Client) {
 
       }
       console.log(`before sendMessageResponse`)
-      const sendMessageResponse = await sendMessage(message.body, message.from+"5")
+      const sendMessageResponse = await sendMessage(message.body, message.from+sessionChange)
       console.log(`sendMessageResponse: ${sendMessageResponse}`)
       let content = ''
       content = sendMessageResponse
