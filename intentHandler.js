@@ -10,15 +10,29 @@ async function handleIntent(userText, sessionId, param) {
   //isMtrStopExist
   console.log(`isCitybusRouteExist: ${await citybusHelper.isCitybusRouteExist(userText)}`)
   console.log(`isMtrStopExist: ${await mtrHelper.isMtrStopExist(userText)}`)
+  let isMtrStopExist = await mtrHelper.isMtrStopExist(userText)
+  let isCitybusRouteExist = await citybusHelper.isCitybusRouteExist(userText)
   let returnMessage = ''
   console.log(`............userText: ${userText}`)
-  let response = await dialogflow.detectIntent(userText, sessionId)
-  let intent = `${response.intent}`
+  let response 
+  let intent
+  if(!isMtrStopExist){
+    response = await dialogflow.detectIntent(userText, sessionId)
+    intent = `${response.intent}`
+  } else {
+    returnMessage = await mtrHelper.getMtrRoutesByMtrStopChinese(userText)
+    console.log(`............returnMessage at handleIntent for isMtrStopExist: ${returnMessage}`)
+
+  }
   let route
   if (intent == 'Default Fallback Intent') {
     console.log(`............Default Fallback Intent`)
     route = userText
-    returnMessage = await handleIntent('lookupBusRoute', sessionId, route)
+    if (isCitybusRouteExist) {
+      returnMessage = await handleIntent('lookupBusRoute', sessionId, route)
+    } else {
+      returnMessage = 'Please input a mtr station or a citybus / nwfb route.'
+    }
     // try{
     // returnMessage = `${JSON.stringify(await citybusHelper.getFirstLastStop('5X'))}`
     // } catch (error){
@@ -71,6 +85,8 @@ async function handleIntent(userText, sessionId, param) {
   } else if (intent == 'stop') {
     returnMessage = await handleStop(response, sessionId)
   }
+  console.log(`............returnMessage at handleIntent before returning: ${returnMessage}`)
+
   return returnMessage
 }
 

@@ -2801,10 +2801,10 @@ function findMtrStopsByStationCode(stationCode) {
 
 function findMtrStopsByStationName(mtrStopChinese, mtrStopEnglish, bound) {
 
-  if (!mtrStopChinese) {
+  if (mtrStopChinese==null) {
     console.log(`condition 1 - !mtrStopChinese`)
     return mtrStops.filter(function(x){return x.stationName==mtrStopEnglish && x.bound == bound})
-  } else if (!mtrStopEnglish) {
+  } else if (mtrStopEnglish==null) {
     console.log(`condition 2 - !mtrStopEnglish`)
     return mtrStops.filter(function(x){return x.stationChineseName==mtrStopChinese && x.bound == bound})
   } else {

@@ -15,15 +15,17 @@ var mtrStopModel = mongoose.model("MtrStop", mtrStopSchema);
 
 async function isMtrStopExist(mtrStop) {
   let routes = await getMtrRoutesFromDBByStationName(mtrStop)
+  console.log(`isMtrStopExist: routes = ${JSON.stringify(routes)}`)
   return (routes.length > 0)
 }
 
 async function getMtrRoutesFromDBByStationName(mtrStop) {
   await connectMongo();
   var routes = mtrStops.findMtrStopsByStationName(mtrStop, null, 'DT')
-  console.log(`routes: ${JSON.stringify(routes)}`)
+  console.log(`routes by Chinese: ${JSON.stringify(routes)}`)
   if (routes.length == 0) {
     routes = mtrStops.findMtrStopsByStationName(null, mtrStop, 'DT')
+    console.log(`routes by English: ${JSON.stringify(routes)}`)
   }
   return routes
 }
@@ -37,7 +39,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
       console.log(`loop route: ${JSON.stringify(route)}`)
       let stationCode = route.stationCode // if mongo, need to change to .get('stationCode')
       let line = route.line
-      console.log(`loop route finish}`)
+      console.log(`loop route finish`)
 
       //Only get ETA if the line is supported
       if (line == 'AEL' || line == 'TKL' || line == 'TCL' || line == 'WRL') {
@@ -57,6 +59,7 @@ async function getMtrRoutesByMtrStopChinese(mtrStop) {
 }
 
 function returnResponseForMtrEta(mtrLineArr) {
+  console.log(`returnResponseForMtrEta start`)
   let resultString = ``
   for (var mtrLine of mtrLineArr) { //loop line
     resultString = resultString + `
@@ -86,6 +89,7 @@ function returnResponseForMtrEta(mtrLineArr) {
       }
     }
   }
+  console.log(`returnResponseForMtrEta: ${resultString}`)
   return resultString
 }
 
