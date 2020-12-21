@@ -58,8 +58,8 @@ function generateAccessToken(email: any, key: any) {
         'Authorization': `Bearer ${accessToken}`
       }
     })
-    console.log(`response = ${JSON.stringify(response.data)}`)
-    console.log(`response = ${JSON.stringify(response.data.queryResult.fulfillmentMessages)}`)
+    console.log(`response = ${JSON.stringify(response.data, null, 2)}`)
+    console.log(`response fulfillmentMessages = ${JSON.stringify(response.data.queryResult.fulfillmentMessages)}`)
 
     let fulfillmentMessagesText = response.data.queryResult.fulfillmentMessages[0].text.text[0]
     let intent = response.data.queryResult.intent.displayName

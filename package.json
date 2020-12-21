@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts"
+    "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
+    "watch:serve": "ts-node --inspect src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,10 +20,15 @@
     "brainly-scraper-ts": "^1.0.3",
     "express": "^4.17.1",
     "google-oauth-jwt": "^0.2.0",
+    "lodash": "^4.17.20",
     "mime-types": "^2.1.27",
     "moment": "^2.29.1",
     "mongoose": "^5.10.15",
+    "node-emoji": "^1.10.0",
     "node-fetch": "^2.6.0",
     "ts-node": "^9.0.0"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^1.1.1"
   }
 }
