@@ -140,10 +140,23 @@ async function postInOutboundStops(company2, route2) {
    */
 }
 
+async function isCitybusRouteExist(route) {
+  let isRouteExist = (await getBusCompany(route) !== '')
+  
+  console.log(`isCitybusRouteExist: ${isRouteExist}`)
+  return isRouteExist
+}
+
 async function getBusCompany(route) {
   const routeModel = await citybusroutesmodel.findOne({"route":route}, function (err, obj) { console.log(`${JSON.stringify(obj)}`); });
   console.log(`........... routeModel: ${JSON.stringify(routeModel)}`)
-  return routeModel.get('co')
+  if (routeModel) {
+    console.log(`........... routeModel is not null`)
+    return routeModel.get('co')
+  } else {
+    console.log(`........... routeModel is null`)
+    return ''
+  }
 }
 
 async function getCitybusStopIdBySeqDirection(route, seq, direction) {
@@ -528,5 +541,6 @@ module.exports = {
   getFullStopIdListWithStopName:getFullStopIdListWithStopName,
   getCitybusStopName:getCitybusStopName,
   getCitybusStopList:getCitybusStopList,
-  getEta: getEta
+  getEta: getEta,
+  isCitybusRouteExist:isCitybusRouteExist
 };

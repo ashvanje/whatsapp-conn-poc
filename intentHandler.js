@@ -6,6 +6,10 @@ const citybusHelper = require('./citybusHelper')
 const { citybus } = require('./constants')
 
 async function handleIntent(userText, sessionId, param) {
+  //isCitybusRouteExist
+  //isMtrStopExist
+  console.log(`isCitybusRouteExist: ${await citybusHelper.isCitybusRouteExist(userText)}`)
+  console.log(`isMtrStopExist: ${await mtrHelper.isMtrStopExist(userText)}`)
   let returnMessage = ''
   console.log(`............userText: ${userText}`)
   let response = await dialogflow.detectIntent(userText, sessionId)
@@ -151,10 +155,12 @@ async function handleBizRuleStop(response, sessionId) {
     let seq = param[0].parameters.stop
     let etaArr = await citybusHelper.getEta(route,direction,seq)
     let i = 1
+    returnMessage = `${etaArr.stopName_tc} ${etaArr.stopName}
+`
     for (var eta of etaArr.eta) {
       console.log(`eta: ${JSON.stringify(eta)}`)
       returnMessage = returnMessage +
-`${eta.stopName_tc} ${eta.minutesLeft}(for debugging)
+`To: ${eta.stopName_tc} ${eta.minutesLeft}
 ` 
     } //TODO: format the response
     // console.log(`returnMessage: ${returnMessage}`)
@@ -173,7 +179,7 @@ async function handleBizRuleStop(response, sessionId) {
     for (var stop of stopList) {
       console.log(`stop: ${JSON.stringify(stop)}`)
       returnMessage = returnMessage +
-`${i++} ${stop.stopnameTc} ${stop.stopnameEn} ${stop.stop} (for debugging)
+`${i++} ${stop.stopnameTc} ${stop.stopnameEn}
 ` //TODO: format the response
     }
     console.log(`returnMessage: ${returnMessage}`)

@@ -13,13 +13,23 @@ var mongoConnection;
 var mtrStopSchema = new mongoose.Schema({line:String, bound:String, stationName:String, stationCode: String});
 var mtrStopModel = mongoose.model("MtrStop", mtrStopSchema);
 
-async function getMtrRoutesByMtrStopChinese(mtrStop) {
+async function isMtrStopExist(mtrStop) {
+  let routes = await getMtrRoutesFromDBByStationName(mtrStop)
+  return (routes.length > 0)
+}
+
+async function getMtrRoutesFromDBByStationName(mtrStop) {
   await connectMongo();
   var routes = mtrStops.findMtrStopsByStationName(mtrStop, null, 'DT')
   console.log(`routes: ${JSON.stringify(routes)}`)
   if (routes.length == 0) {
     routes = mtrStops.findMtrStopsByStationName(null, mtrStop, 'DT')
   }
+  return routes
+}
+async function getMtrRoutesByMtrStopChinese(mtrStop) {
+  await connectMongo();
+  let routes = await getMtrRoutesFromDBByStationName(mtrStop)
   let mtrLineArr = []
   if (routes.length > 0) {
     //For each route, get the MTR ETA
@@ -220,5 +230,6 @@ async function connectMongo() {
 }
 
 module.exports = {
-  getMtrRoutesByMtrStopChinese: getMtrRoutesByMtrStopChinese
+  getMtrRoutesByMtrStopChinese: getMtrRoutesByMtrStopChinese,
+  isMtrStopExist:isMtrStopExist
 };
